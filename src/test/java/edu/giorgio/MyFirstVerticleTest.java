@@ -33,7 +33,7 @@ public class MyFirstVerticleTest {
 	}
 	
 	@Test
-	public void testMyApplication(TestContext context) {
+	public void testMyFirstVerticleShouldStart(TestContext context) {
 		final Async async = context.async();
 		
 		vertx
