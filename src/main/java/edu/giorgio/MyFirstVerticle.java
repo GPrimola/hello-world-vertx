@@ -17,13 +17,17 @@ public class MyFirstVerticle extends AbstractVerticle {
 			request.response()
 			.end("<h1>Hello World Vert.x 3 application!</h1>");
 		})
-		.listen(8080, result -> {
+		.listen(httpPort(), result -> {
 			if(result.succeeded()) {
 				future.complete();
 			} else {
 				future.fail(result.cause());
 			}
 		});
+	}
+	
+	private Integer httpPort() {
+		return config().getInteger("http.port", 8080);
 	}
 
 }

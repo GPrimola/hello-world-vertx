@@ -5,7 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -19,7 +21,9 @@ public class MyFirstVerticleTest {
 	public void setUp(TestContext context) {
 		vertx = Vertx.vertx();
 		vertx
-			.deployVerticle(MyFirstVerticle.class.getName(),
+			.deployVerticle(
+					MyFirstVerticle.class.getName(), 
+					verticleOptions(),
 					context.asyncAssertSuccess());
 	}
 	
@@ -34,13 +38,23 @@ public class MyFirstVerticleTest {
 		
 		vertx
 			.createHttpClient()
-			.getNow(8080, "localhost", "/",
+			.getNow(defaultHttpPort(), "localhost", "/",
 				response -> {
 					response.handler(body -> {
 						context.assertTrue(body.toString().contains("<h1>Hello World Vert.x 3 application!</h1>"));
 						async.complete();
 					});
 				});
+	}
+	
+	private Integer defaultHttpPort() {
+		return 8081;
+	}
+	
+	private DeploymentOptions verticleOptions() {
+		DeploymentOptions options = new DeploymentOptions();
+		options.setConfig(new JsonObject().put("http.port", defaultHttpPort()));
+		return options;
 	}
 
 }
