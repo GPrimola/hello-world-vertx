@@ -1,4 +1,4 @@
-package edu.giorgio;
+package com.softowers;
 
 import io.vertx.core.json.Json;
 import org.junit.After;

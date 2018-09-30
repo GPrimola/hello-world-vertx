@@ -1,4 +1,4 @@
-package edu.giorgio;
+package com.softowers;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -12,12 +12,8 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MyFirstVerticle extends AbstractVerticle {
 	
