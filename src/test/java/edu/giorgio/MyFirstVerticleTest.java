@@ -1,5 +1,6 @@
 package edu.giorgio;
 
+import io.vertx.core.json.Json;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,5 +55,50 @@ public class MyFirstVerticleTest {
 								async.complete();
 							});
 						});
+	}
+
+	@Test
+	public void checkThatIndexPageIsServed(TestContext context) {
+		Async async = context.async();
+
+		vertx.createHttpClient()
+				.getNow(randomHttpPort, "localhost", "/assets/index.html",
+						response -> {
+							context.assertEquals(response.statusCode(), 200);
+							context.assertEquals(response.headers().get("content-type"), "text/html");
+							response.bodyHandler(body -> {
+								context.assertTrue(body.toString().contains("<title>My Whisky Collection</title>"));
+								async.complete();
+							});
+						});
+	}
+
+	@Test
+	public void checkThatWeCanAddWhisky(TestContext context) {
+		Async async = context.async();
+
+		final String whiskyName = "James";
+		final String whiskyOrigin = "Ireland";
+		final String whiskyJson = Json.encode(new Whisky(whiskyName, whiskyOrigin));
+		final String length = Integer.toString(whiskyJson.length());
+
+		vertx.createHttpClient()
+				.post(randomHttpPort, "localhost", "/api/whiskies")
+				.putHeader("content-type", "application/json; charset=utf-8")
+				.putHeader("content-length", length)
+				.handler(response -> {
+					context.assertEquals(response.statusCode(), 201);
+					context.assertTrue(response.headers().get("content-type").contains("application/json"));
+
+					response.bodyHandler(body -> {
+						final Whisky whisky = Json.decodeValue(body.toString(), Whisky.class);
+						context.assertEquals(whisky.getName(), whiskyName);
+						context.assertEquals(whisky.getOrigin(), whiskyOrigin);
+						context.assertNotNull(whisky.getId());
+						async.complete();
+					});
+				})
+				.write(whiskyJson)
+				.end();
 	}
 }
