@@ -12,19 +12,29 @@ import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+
 @RunWith(VertxUnitRunner.class)
 public class MyFirstVerticleTest {
 	
 	private Vertx vertx;
+	private Integer randomHttpPort;
 	
 	@Before
-	public void setUp(TestContext context) {
+	public void setUp(TestContext context) throws IOException {
 		vertx = Vertx.vertx();
-		vertx
-			.deployVerticle(
-					MyFirstVerticle.class.getName(), 
-					verticleOptions(),
-					context.asyncAssertSuccess());
+
+		// Generate a random port to Verticle server
+		ServerSocket socket = new ServerSocket(0);
+		randomHttpPort = socket.getLocalPort();
+		socket.close();
+
+		// Build options to Verticle.config()
+		DeploymentOptions options = new DeploymentOptions();
+		options.setConfig(new JsonObject().put("http.port", randomHttpPort));
+
+		vertx.deployVerticle(MyFirstVerticle.class.getName(), options, context.asyncAssertSuccess());
 	}
 	
 	@After
@@ -36,25 +46,13 @@ public class MyFirstVerticleTest {
 	public void testMyFirstVerticleShouldStart(TestContext context) {
 		final Async async = context.async();
 		
-		vertx
-			.createHttpClient()
-			.getNow(defaultHttpPort(), "localhost", "/",
-				response -> {
-					response.handler(body -> {
-						context.assertTrue(body.toString().contains("<h1>Hello World Vert.x 3 application!</h1>"));
-						async.complete();
-					});
-				});
+		vertx.createHttpClient()
+				.getNow(randomHttpPort, "localhost", "/",
+						response -> {
+							response.handler(body -> {
+								context.assertTrue(body.toString().contains("<h1>Hello World Vert.x 3 application!</h1>"));
+								async.complete();
+							});
+						});
 	}
-	
-	private Integer defaultHttpPort() {
-		return 8081;
-	}
-	
-	private DeploymentOptions verticleOptions() {
-		DeploymentOptions options = new DeploymentOptions();
-		options.setConfig(new JsonObject().put("http.port", defaultHttpPort()));
-		return options;
-	}
-
 }
