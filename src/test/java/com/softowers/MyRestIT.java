@@ -1,31 +1,38 @@
 package com.softowers;
 
 import com.jayway.restassured.RestAssured;
+import com.jayway.restassured.http.ContentType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static com.jayway.restassured.RestAssured.delete;
-import static com.jayway.restassured.RestAssured.get;
-import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.RestAssured.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 public class MyRestIT {
 
     @BeforeClass
-    public static void configureRestAssured() {
+    public static void tearUpRestAssured() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = Integer.getInteger("http.port", 8080);
     }
 
     @AfterClass
-    public static void unconfigureRestAssured() {
+    public static void tearDownRestAssured() {
         RestAssured.reset();
     }
 
     @Test
-    public void checkThatWeCanRetrieveIndividualProduct() {
+    public void checkIndex() {
+        get("/api/whiskies").then()
+            .assertThat()
+            .statusCode(200)
+            .contentType(ContentType.JSON);
+    }
+
+    @Test
+    public void checkGet() {
         final int id = get("/api/whiskies").then()
                 .assertThat()
                 .statusCode(200)
@@ -42,7 +49,7 @@ public class MyRestIT {
     }
 
     @Test
-    public void checkWeCanAddAProduct() {
+    public void checkCreate() {
         Whisky whisky = given()
                 .body("{\"name\":\"Jameson\", \"origin\":\"Ireland\"}")
                 .request().post("/api/whiskies").thenReturn().as(Whisky.class);
@@ -61,7 +68,7 @@ public class MyRestIT {
     }
 
     @Test
-    public void checkWeDeleteAProduct() {
+    public void checkDelete() {
         Whisky whisky = given()
                 .body("{\"name\":\"Jameson\", \"origin\":\"Ireland\"}")
                 .request().post("/api/whiskies").thenReturn().as(Whisky.class);
@@ -87,6 +94,29 @@ public class MyRestIT {
         get("/api/whiskies/" + whisky.getId()).then()
                 .assertThat()
                 .statusCode(404);
+    }
+
+    @Test
+    public void checkUpdate() {
+        Whisky whisky = given()
+            .body("{\"name\":\"Jameson\", \"origin\":\"Ireland\"}")
+            .request()
+            .post("/api/whiskies")
+            .thenReturn()
+            .as(Whisky.class);
+
+        assertThat(whisky.getId()).isNotNull();
+        assertThat(whisky.getId()).isInstanceOf(Integer.class);
+
+        given()
+            .header("content-type", "application/json; charset=utf-8")
+            .body("{ \"name\": \"Giorgio\", \"origin\": \"João Monlevade\" }")
+        .put("/api/whiskies/" + whisky.getId())
+            .then()
+            .statusCode(200)
+            .body("name", equalTo("Giorgio"))
+            .body("origin", equalTo("João Monlevade"))
+            .body("id", equalTo(whisky.getId()));
     }
 }
 
