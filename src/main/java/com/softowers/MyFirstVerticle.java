@@ -130,7 +130,7 @@ public class MyFirstVerticle extends AbstractVerticle {
 			}
 		}
 		
-		context.response().end();
+		context.response().setStatusCode(204).end();
 	}
 	
 	private Integer httpPort() {
