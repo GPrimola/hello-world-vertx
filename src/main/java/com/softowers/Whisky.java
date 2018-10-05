@@ -1,12 +1,14 @@
 package com.softowers;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Whisky {
 	
 	private static final AtomicInteger COUNTER = new AtomicInteger();
 	
-	private final int id;
+	private final Integer id;
 	
 	private String name;
 	
@@ -20,6 +22,22 @@ public class Whisky {
 		this.id = COUNTER.getAndIncrement();
 		this.name = name;
 		this.origin = origin;
+	}
+
+	public Whisky(Integer id, String name, String origin) {
+		this.id = id;
+		this.name = name;
+		this.origin = origin;
+	}
+
+	public Whisky(JsonObject json) {
+		if(json != null) {
+			this.id = json.getInteger("ID");
+			this.name = json.getString("NAME");
+			this.origin = json.getString("ORIGIN");
+		} else {
+			this.id = null;
+		}
 	}
 	
 	public int getId() {

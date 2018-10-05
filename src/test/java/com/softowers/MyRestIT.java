@@ -32,7 +32,7 @@ public class MyRestIT {
     }
 
     @Test
-    public void checkGet() {
+    public void checkFind() {
         final int id = get("/api/whiskies").then()
                 .assertThat()
                 .statusCode(200)

@@ -33,7 +33,11 @@ public class MyFirstVerticleTest {
 
 		// Build options to Verticle.config()
 		DeploymentOptions options = new DeploymentOptions();
-		options.setConfig(new JsonObject().put("http.port", randomHttpPort));
+		options.setConfig(new JsonObject()
+			.put("http.port", randomHttpPort)
+			.put("url", "jdbc:hsqldb:mem:test?shutdown=true")
+			.put("driver_class", "org.hsqldb.jdbcDriver")
+		);
 
 		vertx.deployVerticle(MyFirstVerticle.class.getName(), options, context.asyncAssertSuccess());
 	}
